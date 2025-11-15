@@ -19,17 +19,55 @@ export interface Restaurant {
   distance?: number // 距离用户的距离（米）
 }
 
+interface AmapPoi {
+  id: string
+  name: string
+  address: string
+  tel?: string
+  location: string
+  typecode?: string
+  biz_ext?: {
+    rating?: string
+    cost?: string
+  }
+  biz_time?: string
+  photos?: Array<{ url: string }>
+  distance?: string
+}
+
+interface AmapResponse {
+  status: string
+  info: string
+  pois?: AmapPoi[]
+}
+
+function mapPoiToRestaurant(poi: AmapPoi): Restaurant {
+  const [longitude, latitude] = poi.location.split(',').map(Number)
+
+  return {
+    id: poi.id,
+    name: poi.name,
+    address: poi.address,
+    phone: poi.tel,
+    latitude,
+    longitude,
+    category: poi.typecode || '餐饮',
+    rating: poi.biz_ext?.rating ? parseFloat(poi.biz_ext.rating) : 0,
+    priceLevel: poi.biz_ext?.cost ? parseInt(poi.biz_ext.cost, 10) : 1,
+    isOpen: true, // 高德API不提供实时营业状态
+    openingHours: poi.biz_time,
+    photos: poi.photos?.map(photo => photo.url) || [],
+    distance: poi.distance ? parseInt(poi.distance, 10) : undefined
+  }
+}
+
 function md5(s: string): string {
   function L(k: number, d: number) { return (k << d) | (k >>> (32 - d)) }
-  function K(G: number, k: number) { return (G & k) | (~G & 0xffffffff & ~k) }
-  function F(G: number, k: number) { return (G & k) | (~G & ~k) }
-  function I(G: number, k: number) { return G ^ k }
-  function J(G: number, k: number) { return k ^ (G | ~k) }
   function r(x: number) { return x & 0xffffffff }
   function C(x: number, y: number, z: number, w: number, a: number, b: number, c: number) {
     x = r(x + a + c); return r(L(x, b) + y)
   }
-  function D(a: number) {
+  function D(a: string) {
     const b = []
     for (let i = 0; i < a.length; i++) b.push(a.charCodeAt(i))
     return b
@@ -37,11 +75,6 @@ function md5(s: string): string {
   function E(a: number[]) {
     const b = []
     for (let i = 0; i < a.length * 32; i += 8) b.push((a[i >> 5] >>> (i % 32)) & 0xff)
-    return b
-  }
-  function H(a: number[]) {
-    let b = 0
-    for (let i = 0; i < a.length; i++) b |= a[i] << ((i % 4) * 8)
     return b
   }
   function P(a: number[]) {
@@ -134,24 +167,10 @@ export async function searchNearbyRestaurants(params: SearchParams): Promise<Res
       `https://restapi.amap.com${path}?${searchParams.toString()}`
     )
     
-    const data = await response.json()
+    const data = await response.json() as AmapResponse
     
     if (data.status === '1' && data.pois) {
-      return data.pois.map((poi: any) => ({
-        id: poi.id,
-        name: poi.name,
-        address: poi.address,
-        phone: poi.tel,
-        latitude: parseFloat(poi.location.split(',')[1]),
-        longitude: parseFloat(poi.location.split(',')[0]),
-        category: poi.typecode || '餐饮',
-        rating: parseFloat(poi.biz_ext?.rating) || 0,
-        priceLevel: parseInt(poi.biz_ext?.cost) || 1,
-        isOpen: true, // 高德API不直接提供营业状态，需要额外判断
-        openingHours: poi.biz_time,
-        photos: [], // 高德API不直接提供图片，需要额外获取
-        distance: parseInt(poi.distance)
-      }))
+      return data.pois.map(mapPoiToRestaurant)
     } else {
       console.error('搜索餐厅失败:', data.info)
       return []
@@ -189,24 +208,10 @@ export async function getRestaurantDetail(id: string): Promise<Restaurant | null
 
     
     
-    const data = await response.json()
+    const data = await response.json() as AmapResponse
     
     if (data.status === '1' && data.pois && data.pois.length > 0) {
-      const poi = data.pois[0]
-      return {
-        id: poi.id,
-        name: poi.name,
-        address: poi.address,
-        phone: poi.tel,
-        latitude: parseFloat(poi.location.split(',')[1]),
-        longitude: parseFloat(poi.location.split(',')[0]),
-        category: poi.typecode || '餐饮',
-        rating: parseFloat(poi.biz_ext?.rating) || 0,
-        priceLevel: parseInt(poi.biz_ext?.cost) || 1,
-        isOpen: true,
-        openingHours: poi.biz_time,
-        photos: []
-      }
+      return mapPoiToRestaurant(data.pois[0])
     } else {
       console.error('获取餐厅详情失败:', data.info)
       return null
