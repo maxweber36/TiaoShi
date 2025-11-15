@@ -31,11 +31,18 @@ const DISTANCE_OPTIONS = [
 export default function Preferences() {
   const navigate = useNavigate()
   const { updatePreferences, preferences } = useRestaurants()
+  const prefs = preferences || {
+    cuisineTypes: [],
+    priceRange: [1, 4],
+    maxDistance: 1000,
+    dietaryRestrictions: [],
+    preferredTime: 'lunch'
+  }
   
-  const [selectedCuisines, setSelectedCuisines] = useState<string[]>(preferences.cuisineTypes)
-  const [priceRange, setPriceRange] = useState<[number, number]>(preferences.priceRange)
-  const [maxDistance, setMaxDistance] = useState<number>(preferences.maxDistance)
-  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(preferences.dietaryRestrictions || [])
+  const [selectedCuisines, setSelectedCuisines] = useState<string[]>(Array.isArray(prefs.cuisineTypes) ? prefs.cuisineTypes : [])
+  const [priceRange, setPriceRange] = useState<[number, number]>(Array.isArray(prefs.priceRange) ? prefs.priceRange as [number, number] : [1, 4])
+  const [maxDistance, setMaxDistance] = useState<number>(typeof prefs.maxDistance === 'number' ? prefs.maxDistance : 1000)
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(Array.isArray(prefs.dietaryRestrictions) ? (prefs.dietaryRestrictions as string[]) : [])
 
   const handleCuisineToggle = (cuisine: string) => {
     setSelectedCuisines(prev => 

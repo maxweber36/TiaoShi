@@ -120,7 +120,7 @@ export async function getAddressFromCoordinates(latitude: number, longitude: num
   
   if (!amapKey) {
     console.warn('高德地图API密钥未配置')
-    return '位置信息获取失败'
+    return ''
   }
 
   try {
@@ -147,11 +147,11 @@ export async function getAddressFromCoordinates(latitude: number, longitude: num
       return data.regeocode.formatted_address || '未知地址'
     } else {
       console.error('逆地理编码失败:', data.info)
-      return '地址解析失败'
+      return ''
     }
   } catch (error) {
     console.error('获取地址信息失败:', error)
-    return '地址解析失败'
+    return ''
   }
 }
 
@@ -171,7 +171,7 @@ export async function getCoordinatesFromAddress(address: string): Promise<Locati
     const path = '/v3/geocode/geo'
     const params = new URLSearchParams({
       key: amapKey,
-      address: encodeURIComponent(address)
+      address: address
     })
     if (amapSigSecret) {
       const entries = Array.from(params.entries()).sort(([a],[b]) => a.localeCompare(b))
