@@ -3,7 +3,7 @@
  * 处理用户位置获取逻辑
  */
 
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import { 
   getCurrentLocation, 
   getAddressFromCoordinates,

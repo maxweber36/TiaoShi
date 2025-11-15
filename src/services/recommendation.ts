@@ -5,6 +5,17 @@
 
 import { Restaurant } from './restaurant'
 
+interface RawRecommendationResponse {
+  recommendations?: RawRecommendation[]
+}
+
+interface RawRecommendation {
+  restaurantId: string
+  score?: number
+  reasons?: string[] | string
+  matchType?: string
+}
+
 export interface UserPreferences {
   cuisineTypes: string[] // 偏好菜系
   priceRange: [number, number] // 价格区间 [min, max]
@@ -21,6 +32,7 @@ export interface RecommendationContext {
   preferences: UserPreferences
   weather?: string // 天气信息
   timeOfDay?: string // 时间段
+  preferredTime?: string // 用餐时间
   previousChoices?: string[] // 历史选择
 }
 
@@ -57,7 +69,7 @@ export async function getSmartRecommendations(
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'Qwen/Qwen2.5-7B-Instruct',
+        model: 'MiniMaxAI/MiniMax-M2',
         messages: [
           {
             role: 'system',
@@ -69,7 +81,7 @@ export async function getSmartRecommendations(
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 100000,
         response_format: { type: 'json_object' }
       })
     })
@@ -77,7 +89,7 @@ export async function getSmartRecommendations(
     const data = await response.json()
     
     if (data.choices && data.choices.length > 0) {
-      const recommendationData = JSON.parse(data.choices[0].message.content)
+      const recommendationData = JSON.parse(data.choices[0].message.content) as RawRecommendationResponse
       return processRecommendationResults(recommendationData, restaurants)
     } else {
       console.error('AI推荐失败:', data.error)
@@ -146,7 +158,7 @@ ${JSON.stringify(restaurantList, null, 2)}
  * 处理推荐结果
  */
 function processRecommendationResults(
-  recommendationData: any, 
+  recommendationData: RawRecommendationResponse, 
   restaurants: Restaurant[]
 ): Recommendation[] {
   if (!recommendationData.recommendations || !Array.isArray(recommendationData.recommendations)) {
@@ -154,18 +166,28 @@ function processRecommendationResults(
   }
 
   return recommendationData.recommendations
-    .map((rec: any) => {
+    .map((rec) => {
       const restaurant = restaurants.find(r => r.id === rec.restaurantId)
       if (!restaurant) return null
 
+      const normalizedReasons = Array.isArray(rec.reasons)
+        ? rec.reasons.map(String)
+        : rec.reasons
+        ? [String(rec.reasons)]
+        : []
+
+      const matchType: Recommendation['matchType'] = rec.matchType && ['perfect', 'good', 'fair'].includes(rec.matchType)
+        ? (rec.matchType as Recommendation['matchType'])
+        : 'fair'
+
       return {
         restaurant,
-        score: Math.min(Math.max(rec.score || 0, 0), 100),
-        reasons: Array.isArray(rec.reasons) ? rec.reasons : [String(rec.reasons || '')],
-        matchType: ['perfect', 'good', 'fair'].includes(rec.matchType) ? rec.matchType : 'fair'
+        score: Math.min(Math.max(rec.score ?? 0, 0), 100),
+        reasons: normalizedReasons,
+        matchType
       }
     })
-    .filter(Boolean)
+    .filter((result): result is Recommendation => result !== null)
     .sort((a, b) => b.score - a.score)
 }
 
@@ -176,7 +198,7 @@ function getBasicRecommendations(
   context: RecommendationContext,
   restaurants: Restaurant[]
 ): Recommendation[] {
-  const scoredRestaurants = restaurants.map(restaurant => {
+  const scoredRestaurants: Recommendation[] = restaurants.map(restaurant => {
     let score = 0
     const reasons: string[] = []
 

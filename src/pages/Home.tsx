@@ -48,12 +48,7 @@ export default function Home() {
       setIsSearching(true)
       // 这里需要实现地址解析功能
       // 暂时使用模拟位置
-      const mockLocation = {
-        latitude: 39.9042,
-        longitude: 116.4074,
-        address: manualAddress
-      }
-      
+
       // 更新位置信息
       // 这里需要调用地址解析服务
       alert(`地址功能开发中，已使用模拟位置：${manualAddress}`)

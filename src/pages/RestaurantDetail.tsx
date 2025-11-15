@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ChevronLeft, Star, MapPin, Clock, Phone, Navigation, Heart, Share2 } from 'lucide-react'
+import { ChevronLeft, Star, MapPin, Clock, Phone, Navigation, Heart, Share2, Utensils } from 'lucide-react'
 import { getRestaurantDetail, Restaurant } from '../services/restaurant'
 
 export default function RestaurantDetail() {

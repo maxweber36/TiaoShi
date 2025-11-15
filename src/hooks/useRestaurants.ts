@@ -3,18 +3,17 @@
  * 处理餐厅搜索和推荐逻辑
  */
 
-import { useState, useCallback } from 'react'
-import { 
-  searchNearbyRestaurants, 
-  Restaurant, 
+import { useCallback } from 'react'
+import {
+  searchNearbyRestaurants,
+  Restaurant,
   SearchParams,
-  filterRestaurantsByPreferences 
+  filterRestaurantsByPreferences
 } from '../services/restaurant'
-import { 
-  getSmartRecommendations, 
+import {
+  getSmartRecommendations,
   UserPreferences,
-  RecommendationContext,
-  Recommendation 
+  RecommendationContext
 } from '../services/recommendation'
 import { useAppStore } from '../store'
 
@@ -47,12 +46,6 @@ export function useRestaurants() {
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
         radius: 1000, // 默认1公里
-        // 从地址中提取城市作为region（用于文本搜索）
-        region: (() => {
-          const addr = currentLocation.address || ''
-          const match = addr.match(/[\u4e00-\u9fa5]+市/)
-          return match ? match[0] : undefined
-        })(),
         ...params
       }
 
@@ -121,7 +114,8 @@ export function useRestaurants() {
     searchNearby,
     getRecommendations,
     filterByPreferences,
-    updatePreferences
+    updatePreferences,
+    preferences
   }
 }
 

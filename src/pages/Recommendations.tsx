@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, Star, MapPin, Clock, Phone, Filter, TrendingUp } from 'lucide-react'
 import { useRestaurants } from '../hooks/useRestaurants'
-import { Restaurant } from '../services/restaurant'
 
 export default function Recommendations() {
   const navigate = useNavigate()
@@ -122,7 +121,7 @@ export default function Recommendations() {
             <Filter className="w-4 h-4 text-gray-500" />
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as 'score' | 'distance' | 'rating')}
               className="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
             >
               <option value="score">智能评分</option>
@@ -192,7 +191,7 @@ export default function Recommendations() {
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium text-gray-900 mb-2">推荐理由</h4>
                     <div className="flex flex-wrap gap-2">
-                      {recommendation.reasons.map((reason, index) => (
+                      {recommendation.reasons.map((reason: string, index: number) => (
                         <span
                           key={index}
                           className="px-3 py-1 bg-orange-50 text-orange-700 text-xs rounded-full"

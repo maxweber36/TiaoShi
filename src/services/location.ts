@@ -15,7 +15,7 @@ function md5(s: string): string {
   function C(x: number, y: number, z: number, w: number, a: number, b: number, c: number) {
     x = r(x + a + c); return r(L(x, b) + y)
   }
-  function D(a: number) {
+  function D(a: string) {
     const b = []
     for (let i = 0; i < a.length; i++) b.push(a.charCodeAt(i))
     return b
