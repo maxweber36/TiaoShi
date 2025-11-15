@@ -88,7 +88,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Utensils className="w-8 h-8 text-orange-500 mr-3" />
-              <h1 className="text-2xl font-bold text-gray-900">吃饭推荐</h1>
+              <h1 className="text-2xl font-bold text-gray-900">挑食</h1>
             </div>
             <button
               onClick={() => navigate('/preferences')}
@@ -97,7 +97,7 @@ export default function Home() {
               <Settings className="w-6 h-6" />
             </button>
           </div>
-          <p className="text-gray-600 mt-2">智能推荐，解决你的选择困难</p>
+          <p className="text-gray-600 mt-2">我们只做专业的吃饭推荐</p>
         </div>
       </div>
 
@@ -213,8 +213,8 @@ export default function Home() {
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Utensils className="w-6 h-6 text-orange-500" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">智能推荐</h3>
-            <p className="text-gray-600 text-sm">AI算法为你推荐最合适的餐厅</p>
+            <h3 className="font-semibold text-gray-900 mb-2">专业挑食</h3>
+            <p className="text-gray-600 text-sm">AI算法为你精挑细选最合适的餐厅</p>
           </div>
         </div>
       </div>
