@@ -11,7 +11,7 @@ import { useRestaurants } from '../hooks/useRestaurants'
 
 export default function Home() {
   const navigate = useNavigate()
-  const { location, isLocating, locationError, fetchCurrentLocation, fetchLocationByIP } = useLocation()
+  const { location, isLocating, locationError, fetchCurrentLocation, fetchLocationByIP, geocodeAddress } = useLocation()
   const { searchNearby, getRecommendations, isLoadingRestaurants, isGeneratingRecommendations } = useRestaurants()
   
   const [manualAddress, setManualAddress] = useState('')
@@ -46,12 +46,8 @@ export default function Home() {
 
     try {
       setIsSearching(true)
-      // 这里需要实现地址解析功能
-      // 暂时使用模拟位置
-
-      // 更新位置信息
-      // 这里需要调用地址解析服务
-      alert(`地址功能开发中，已使用模拟位置：${manualAddress}`)
+      // 调用地址解析服务，将地址转换为经纬度并更新位置
+      await geocodeAddress(manualAddress)
     } catch (error) {
       console.error('地址解析失败:', error)
       alert('地址解析失败，请检查输入')

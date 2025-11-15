@@ -7,6 +7,7 @@ import { useCallback } from 'react'
 import { 
   getCurrentLocation, 
   getAddressFromCoordinates,
+  getCoordinatesFromAddress,
   Location 
 } from '../services/location'
 import { getLocationByIP, getApproximateLocation } from '../services/ipLocation'
@@ -98,12 +99,35 @@ export function useLocation() {
     clearError()
   }, [setLocation, clearError])
 
+  /**
+   * 根据地址解析经纬度并更新位置
+   * @param {string} address 用户输入的地址
+   * @returns {Promise<Location>} 解析后的位置信息，包含经纬度与地址
+   */
+  const geocodeAddress = useCallback(async (address: string) => {
+    try {
+      setLocating(true)
+      setLocationError(null)
+
+      const location = await getCoordinatesFromAddress(address)
+      setLocation(location)
+      return location
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '地址解析失败'
+      setLocationError(errorMessage)
+      throw error
+    } finally {
+      setLocating(false)
+    }
+  }, [setLocation, setLocating, setLocationError])
+
   return {
     location: currentLocation,
     isLocating,
     locationError,
     fetchCurrentLocation,
     fetchLocationByIP,
-    setManualLocation
+    setManualLocation,
+    geocodeAddress
   }
 }
