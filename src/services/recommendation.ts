@@ -4,6 +4,8 @@
  */
 
 import { Restaurant } from './restaurant'
+import { checkCuisineMatch } from '../lib/poiTypes'
+import { demoRestaurants } from './demoData'
 
 interface RawRecommendationResponse {
   recommendations?: RawRecommendation[]
@@ -18,6 +20,7 @@ interface RawRecommendation {
 
 export interface UserPreferences {
   cuisineTypes: string[] // 偏好菜系
+  poiTypes?: string[] // 偏好的POI类型码
   priceRange: [number, number] // 价格区间 [min, max]
   maxDistance: number // 最大距离（米）
   dietaryRestrictions?: string[] // 饮食限制
@@ -52,15 +55,20 @@ export async function getSmartRecommendations(
   restaurants: Restaurant[]
 ): Promise<Recommendation[]> {
   const apiKey = import.meta.env.VITE_SILICON_API_KEY
+  const model = import.meta.env.VITE_SILICON_MODEL || 'Qwen/Qwen2.5-7B-Instruct'
+  const parsedMaxTokens = Number(import.meta.env.VITE_SILICON_MAX_TOKENS)
+  const maxTokens = Number.isFinite(parsedMaxTokens) && parsedMaxTokens > 0 ? parsedMaxTokens : 2048
+  const useDemoData = import.meta.env.VITE_USE_DEMO_DATA === 'true'
+  const restaurantCandidates = restaurants.length > 0 ? restaurants : demoRestaurants
   
-  if (!apiKey) {
-    console.warn('硅基流动API密钥未配置，使用基础推荐算法')
-    return getBasicRecommendations(context, restaurants)
+  if (!apiKey || useDemoData) {
+    console.warn('使用基础推荐算法：缺少硅基流动API密钥或启用了演示模式')
+    return getBasicRecommendations(context, restaurantCandidates)
   }
 
   try {
     // 构建推荐请求数据
-    const prompt = buildRecommendationPrompt(context, restaurants)
+    const prompt = buildRecommendationPrompt(context, restaurantCandidates)
     
     const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
       method: 'POST',
@@ -69,7 +77,7 @@ export async function getSmartRecommendations(
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'MiniMaxAI/MiniMax-M2',
+        model,
         messages: [
           {
             role: 'system',
@@ -80,8 +88,8 @@ export async function getSmartRecommendations(
             content: prompt
           }
         ],
-        temperature: 0.7,
-        max_tokens: 100000,
+        temperature: 0.2,
+        max_tokens: maxTokens,
         response_format: { type: 'json_object' }
       })
     })
@@ -89,15 +97,20 @@ export async function getSmartRecommendations(
     const data = await response.json()
     
     if (data.choices && data.choices.length > 0) {
-      const recommendationData = JSON.parse(data.choices[0].message.content) as RawRecommendationResponse
-      return processRecommendationResults(recommendationData, restaurants)
+      const content = data.choices[0].message?.content
+      if (!content) {
+        console.warn('AI推荐返回结果为空，降级为基础推荐')
+        return getBasicRecommendations(context, restaurantCandidates)
+      }
+      const recommendationData = JSON.parse(content) as RawRecommendationResponse
+      return processRecommendationResults(recommendationData, restaurantCandidates)
     } else {
       console.error('AI推荐失败:', data.error)
-      return getBasicRecommendations(context, restaurants)
+      return getBasicRecommendations(context, restaurantCandidates)
     }
   } catch (error) {
     console.error('智能推荐失败:', error)
-    return getBasicRecommendations(context, restaurants)
+    return getBasicRecommendations(context, restaurantCandidates)
   }
 }
 
@@ -230,12 +243,14 @@ function getBasicRecommendations(
 
     // 菜系匹配 (0-15分)
     if (context.preferences.cuisineTypes.length > 0) {
-      const hasMatchingCuisine = context.preferences.cuisineTypes.some(cuisine =>
-        restaurant.category.toLowerCase().includes(cuisine.toLowerCase())
-      )
+      const hasMatchingCuisine = checkCuisineMatch(restaurant.category, context.preferences.cuisineTypes)
       if (hasMatchingCuisine) {
         score += 15
         reasons.push('菜系偏好匹配')
+      } else {
+        // 如果不匹配，额外扣除分数
+        score -= 5
+        reasons.push('菜系不匹配')
       }
     }
 

@@ -7,11 +7,23 @@
  */
 import { useState } from 'react'
 import { UserPreferences } from '../services/recommendation'
+import { CUISINE_TYPES } from '../lib/poiTypes'
 
-const CUISINE_TYPES = [
-  '川菜', '粤菜', '湘菜', '东北菜', '鲁菜', '苏菜', '浙菜', '闽菜',
-  '快餐', '简餐', '火锅', '烧烤', '日料', '韩料', '西餐', '东南亚菜',
-  '素食', '清真', '小吃', '面馆', '饺子', '包子', '粥铺'
+// 使用POI分类码表中的菜系类型
+const CUISINE_OPTIONS = CUISINE_TYPES.map(cuisine => ({
+  name: cuisine.name,
+  code: cuisine.code,
+  keywords: cuisine.keywords
+}))
+
+// 添加其他餐饮类型 - 基于官方POI标准
+const OTHER_FOOD_TYPES = [
+  { name: '咖啡厅', code: '050500', keywords: ['咖啡', 'coffee', 'cafe'] },
+  { name: '茶艺馆', code: '050600', keywords: ['茶', '茶艺', '奶茶'] },
+  { name: '甜品店', code: '050900', keywords: ['甜品', '蛋糕', 'dessert'] },
+  { name: '快餐厅', code: '050300', keywords: ['快餐', '汉堡', '炸鸡'] },
+  { name: '茶餐厅', code: '050305', keywords: ['茶餐厅', '港式'] },
+  { name: '休闲餐饮', code: '050400', keywords: ['休闲餐饮', '简餐'] }
 ]
 
 const PRICE_LEVELS = [
@@ -37,6 +49,7 @@ interface PreferenceFormProps {
 
 export default function PreferenceForm({ initial, onSubmit, submitLabel = '保存偏好' }: PreferenceFormProps) {
   const [selectedCuisines, setSelectedCuisines] = useState<string[]>(Array.isArray(initial.cuisineTypes) ? initial.cuisineTypes : [])
+  const [selectedPOITypes, setSelectedPOITypes] = useState<string[]>(Array.isArray(initial.poiTypes) ? initial.poiTypes : [])
   const [priceRange, setPriceRange] = useState<[number, number]>(Array.isArray(initial.priceRange) ? initial.priceRange as [number, number] : [1, 4])
   const [maxDistance, setMaxDistance] = useState<number>(typeof initial.maxDistance === 'number' ? initial.maxDistance : 1000)
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(Array.isArray(initial.dietaryRestrictions) ? (initial.dietaryRestrictions as string[]) : [])
@@ -46,10 +59,22 @@ export default function PreferenceForm({ initial, onSubmit, submitLabel = '保�
    * @param {string} cuisine 菜系名称
    */
   const handleCuisineToggle = (cuisine: string) => {
-    setSelectedCuisines(prev => 
-      prev.includes(cuisine) 
+    setSelectedCuisines(prev =>
+      prev.includes(cuisine)
         ? prev.filter(c => c !== cuisine)
         : [...prev, cuisine]
+    )
+  }
+
+  /**
+   * 切换POI类型选择
+   * @param {string} poiType POI类型码
+   */
+  const handlePOITypeToggle = (poiType: string) => {
+    setSelectedPOITypes(prev =>
+      prev.includes(poiType)
+        ? prev.filter(t => t !== poiType)
+        : [...prev, poiType]
     )
   }
 
@@ -80,6 +105,7 @@ export default function PreferenceForm({ initial, onSubmit, submitLabel = '保�
   const handleSubmit = () => {
     onSubmit({
       cuisineTypes: selectedCuisines,
+      poiTypes: selectedPOITypes,
       priceRange,
       maxDistance,
       dietaryRestrictions
@@ -91,22 +117,43 @@ export default function PreferenceForm({ initial, onSubmit, submitLabel = '保�
       {/* 菜系偏好 */}
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">偏好菜系</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-          {CUISINE_TYPES.map(cuisine => (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {CUISINE_OPTIONS.map(cuisine => (
             <button
-              key={cuisine}
-              onClick={() => handleCuisineToggle(cuisine)}
+              key={cuisine.code}
+              onClick={() => handleCuisineToggle(cuisine.name)}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedCuisines.includes(cuisine)
+                selectedCuisines.includes(cuisine.name)
                   ? 'bg-orange-100 text-orange-700 border-2 border-orange-300'
                   : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200'
               }`}
             >
-              {cuisine}
+              {cuisine.name}
             </button>
           ))}
         </div>
         <p className="text-sm text-gray-500 mt-3">选择你喜欢的菜系类型，可多选</p>
+      </div>
+
+      {/* 餐饮场所类型 */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">餐饮场所类型</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {OTHER_FOOD_TYPES.map(type => (
+            <button
+              key={type.code}
+              onClick={() => handlePOITypeToggle(type.code)}
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedPOITypes.includes(type.code)
+                  ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                  : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200'
+              }`}
+            >
+              {type.name}
+            </button>
+          ))}
+        </div>
+        <p className="text-sm text-gray-500 mt-3">选择喜欢的餐饮场所类型，可多选</p>
       </div>
 
       {/* 价格区间 */}

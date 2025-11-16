@@ -1,120 +1,146 @@
-# 打工人吃饭推荐应用
+# Worker Lunch Recommendation App
 
-一个智能的餐厅推荐网页应用，帮助上班族解决"吃什么"的选择困难。
+An intelligent restaurant recommendation web application that helps office workers solve the "what to eat" dilemma.
 
-## 功能特性
+## Project Background
 
-- 🎯 **智能定位**：自动获取用户位置或手动输入地址
-- 🍽️ **个性偏好**：设置口味、价格、距离等偏好
-- 🤖 **AI 推荐**：集成硅基流动 API 提供智能推荐
-- 🗺️ **地图集成**：使用高德地图 API 获取周边餐厅信息
-- 📱 **响应式设计**：适配移动端和桌面端
+This project originated from an AI Coding offline event, where we aimed to quickly build product demos using AI tools. As such, this product is still quite rough and requires extensive refinement. The idea for this product comes from a real-world need: during workdays, when lunchtime arrives, we often struggle with colleagues and friends to decide what to eat. We hope to help everyone make dining choices more easily through intelligent recommendations, avoiding the frustration of "choice paralysis."
 
-## 技术栈
+## Features
 
-- **前端**：React 18 + TypeScript + Tailwind CSS
-- **状态管理**：Zustand
-- **路由**：React Router DOM
-- **图标**：Lucide React
-- **API 集成**：高德地图 API、硅基流动 API
+- 🎯 **Smart Location**: Automatically get user location or manually input address
+- 🍽️ **Personal Preferences**: Set taste, price, distance and other preferences
+- 🤖 **AI Recommendations**: Integrated SiliconFlow API for intelligent recommendations
+- 🗺️ **Map Integration**: Use Amap API to get nearby restaurant information
+- 📱 **Responsive Design**: Adapted for mobile and desktop
 
-## 快速开始
+## Tech Stack
 
-### 1. 安装依赖
+- **Frontend**: React 18 + TypeScript + Tailwind CSS
+- **State Management**: Zustand
+- **Routing**: React Router DOM
+- **Icons**: Lucide React
+- **API Integration**: Amap API, SiliconFlow API
+
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2. 配置环境变量
+### 2. Configure Environment Variables
 
-创建 `.env` 文件并添加以下配置：
+Create a `.env` file and fill in the following variables as needed:
+
+| Variable                  | Description                                                              |
+| ------------------------- | ------------------------------------------------------------------------ |
+| `VITE_AMAP_API_KEY`       | Amap API Key, required for production                                    |
+| `VITE_AMAP_SIG_SECRET`    | (Optional) Used when enabling interface signature verification           |
+| `VITE_SILICON_API_KEY`    | SiliconFlow API Key, used for AI recommendations                         |
+| `VITE_SILICON_MODEL`      | (Optional) AI model name, default `Qwen/Qwen2.5-7B-Instruct`             |
+| `VITE_SILICON_MAX_TOKENS` | (Optional) AI response token limit, default `2048`                       |
+| `VITE_USE_DEMO_DATA`      | Set to `true` to use built-in demo data for development without API keys |
 
 ```env
-VITE_AMAP_API_KEY=你的高德地图API密钥
-VITE_SILICON_API_KEY=你的硅基流动API密钥
+VITE_AMAP_API_KEY=your_amap_api_key_here
+VITE_AMAP_SIG_SECRET=
+VITE_SILICON_API_KEY=your_silicon_api_key_here
+VITE_SILICON_MODEL=Qwen/Qwen2.5-7B-Instruct
+VITE_SILICON_MAX_TOKENS=2048
+VITE_USE_DEMO_DATA=false
 ```
 
-### 3. 启动开发服务器
+> ✅ Local experience without any API keys: Set `VITE_USE_DEMO_DATA` to `true`, the system will fall back to built-in restaurant and recommendation samples for quick contributor setup.
+
+### 3. Start Development Server
 
 ```bash
 pnpm run dev
 ```
 
-### 4. 构建生产版本
+### 4. Build for Production
 
 ```bash
 pnpm run build
 ```
 
-## 项目结构
+## Project Structure
 
 ```
 src/
-├── components/          # 可复用组件
-├── hooks/              # 自定义Hook
-├── pages/              # 页面组件
-├── services/           # API服务
-├── store/              # 状态管理
-└── utils/              # 工具函数
+├── components/          # Reusable components
+├── hooks/              # Custom hooks
+├── pages/              # Page components
+├── services/           # API services
+├── store/              # State management
+└── utils/              # Utility functions
 ```
 
-## 核心功能
+## Core Features
 
-### 位置获取
+### Location Acquisition
 
-- 浏览器 Geolocation API 自动定位
-- 高德地图 API 地址解析
-- 手动地址输入
+- Browser Geolocation API automatic positioning
+- Amap API address resolution
+- Manual address input
 
-### 餐厅搜索
+### Restaurant Search
 
-- 基于位置的周边餐厅搜索
-- 多种筛选条件（距离、价格、菜系）
-- 餐厅详细信息获取
+- Location-based nearby restaurant search
+- Multiple filtering conditions (distance, price, cuisine)
+- Detailed restaurant information retrieval
 
-### 智能推荐
+### AI Recommendations
 
-- 集成硅基流动 AI API
-- 个性化推荐算法
-- 多维度评分系统
+- Integrated SiliconFlow AI API
+- Personalized recommendation algorithms
+- Multi-dimensional rating system
 
-### 用户偏好
+### User Preferences
 
-- 菜系偏好设置
-- 价格区间选择
-- 距离范围设置
-- 饮食限制选项
+- Cuisine preference settings
+- Price range selection
+- Distance range settings
+- Dietary restriction options
 
-## API 配置
+## API Configuration
 
-### 高德地图 API
+### Amap API
 
-- 申请地址：https://lbs.amap.com/
-- 需要服务：地理编码、逆地理编码、地点搜索
+- Application URL: https://lbs.amap.com/
+- Required services: Geocoding, Reverse geocoding, Place search
 
-### 硅基流动 API
+### SiliconFlow API
 
-- 申请地址：https://siliconflow.cn/
-- 使用模型：Qwen/Qwen2.5-7B-Instruct
+- Application URL: https://siliconflow.cn/
+- Default model: `Qwen/Qwen2.5-7B-Instruct` (can be overridden in `.env`)
+- Default response `max_tokens=2048`, can be adjusted as needed
 
-## 使用说明
+## Usage Instructions
 
-1. **获取位置**：允许浏览器获取位置或手动输入地址
-2. **设置偏好**：点击设置按钮配置个人偏好
-3. **获取推荐**：点击"开始推荐"按钮获取智能推荐
-4. **查看详情**：点击餐厅卡片查看详细信息
-5. **导航功能**：点击导航按钮跳转到地图导航
+1. **Get Location**: Allow browser to get location or manually input address
+2. **Set Preferences**: Click settings button to configure personal preferences
+3. **Get Recommendations**: Click "Start Recommendation" button to get intelligent recommendations
+4. **View Details**: Click restaurant card to view detailed information
+5. **Navigation**: Click navigation button to jump to map navigation
 
-## 开发计划
+## Local Development Experience
 
-- [ ] 添加用户登录和收藏功能
-- [ ] 添加餐厅评价和评分系统
+- **Strict Types Enabled by Default**: `pnpm run dev` and `pnpm run build` use TypeScript strict configuration, consistent with CI.
+- **Demo Data Mode**: Enable `VITE_USE_DEMO_DATA=true`, restaurant search and AI recommendations return built-in samples for offline or keyless debugging.
+- **Submission Process**: Run `pnpm run validate` before submitting code to ensure type checking and ESLint pass.
 
-## 贡献指南
+## Development Roadmap
 
-欢迎提交 Issue 和 Pull Request 来改进这个项目。
+- [ ] Add user login and favorites feature
+- [ ] Add restaurant reviews and rating system
 
-## 许可证
+## Contributing
 
-MIT License
+Before submitting an Issue or Pull Request, please read [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+## License
+
+This project is released under the [MIT License](LICENSE).

@@ -1,8 +1,17 @@
 {
   "name": "tiaoshi",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maxweber36/TiaoShi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxweber36/TiaoShi/issues"
+  },
+  "homepage": "https://github.com/maxweber36/TiaoShi#readme",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
