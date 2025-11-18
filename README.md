@@ -1,5 +1,7 @@
 # Worker Lunch Recommendation App
 
+[中文文档](README.zh.md) | English
+
 An intelligent restaurant recommendation web application that helps office workers solve the "what to eat" dilemma.
 
 ## Project Background
